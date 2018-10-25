@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     CameraRaycaster cameraRaycaster;
     Vector3 currentClickTarget;
         
+    //TODO fix issue with click to move and WSAD conflicting and increasing speed
     private void Start()
     {
         cameraRaycaster = Camera.main.GetComponent<CameraRaycaster>();
