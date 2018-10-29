@@ -6,16 +6,16 @@ using UnityStandardAssets.Characters.ThirdPerson;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] float walkMoveStopRadius = 0.2f;
-    ThirdPersonCharacter m_Character;   // A reference to the ThirdPersonCharacter on the object
+    ThirdPersonCharacter thirdPersonCHaracter;   // A reference to the ThirdPersonCharacter on the object
     CameraRaycaster cameraRaycaster;
     Vector3 currentClickTarget;
 
-    bool isInDirectMode = false;//TODO consider making static later
+    bool isInDirectMode = false;
 
     private void Start()
     {
         cameraRaycaster = Camera.main.GetComponent<CameraRaycaster>();
-        m_Character = GetComponent<ThirdPersonCharacter>();
+        thirdPersonCHaracter = GetComponent<ThirdPersonCharacter>();
         currentClickTarget = transform.position;
     }
 
@@ -25,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.G))    //TODO G dor gamepad. allow player to map later
         {
             isInDirectMode = !isInDirectMode; //toggle mode
+            currentClickTarget = transform.position;
         }
         if (isInDirectMode)
         {
@@ -41,17 +42,17 @@ public class PlayerMovement : MonoBehaviour
         float v = Input.GetAxis("Vertical");
 
 
-        Vector3 m_CamForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1)).normalized;
-        Vector3 m_Move = v * m_CamForward + h * Camera.main.transform.right;
+        Vector3 cameraForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1)).normalized;
+        Vector3 movement = v * cameraForward + h * Camera.main.transform.right;
 
-        m_Character.Move(m_Move, false, false);
+        thirdPersonCHaracter.Move(movement, false, false);
 
     }
     private void ProcessMouseMovement()
     {
         if (Input.GetMouseButton(0))
         {
-            switch (cameraRaycaster.layerHit)
+            switch (cameraRaycaster.currentLayerHit)
             {
                 case Layer.Walkable:
                     currentClickTarget = cameraRaycaster.hit.point;
@@ -68,11 +69,11 @@ public class PlayerMovement : MonoBehaviour
         var playerToClickPoint = currentClickTarget - transform.position;
         if (playerToClickPoint.magnitude >= walkMoveStopRadius)
         {
-            m_Character.Move(playerToClickPoint, false, false);
+            thirdPersonCHaracter.Move(playerToClickPoint, false, false);
         }
         else
         {
-            m_Character.Move(Vector3.zero, false, false);
+            thirdPersonCHaracter.Move(Vector3.zero, false, false);
         }
     }
 }
