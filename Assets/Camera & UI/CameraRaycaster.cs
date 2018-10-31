@@ -22,6 +22,10 @@ public class CameraRaycaster : MonoBehaviour
         get { return layerHit; }
     }
 
+    public delegate void OnLayerChange();   //declare new delgate type
+    public OnLayerChange layerChangeObservers;  //instantiate an observer set
+
+    
     void Start() 
     {
         viewCamera = Camera.main;
@@ -36,7 +40,11 @@ public class CameraRaycaster : MonoBehaviour
             if (hit.HasValue)
             {
                 raycastHit = hit.Value;
-                layerHit = layer;
+                if (layerHit != layer)
+                {
+                    layerHit = layer;
+                    layerChangeObservers(); //call the delegates
+                }
                 return;
             }
         }
