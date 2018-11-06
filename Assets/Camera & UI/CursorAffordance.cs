@@ -15,12 +15,12 @@ public class CursorAffordance : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         cameraRaycaster = GetComponent<CameraRaycaster>();
-        cameraRaycaster.layerChangeObservers += OnDelegateCalled;
+        cameraRaycaster.onLayerChange += OnLayerChanged;
 	}
 	
 	
-	void OnDelegateCalled () {
-        switch (cameraRaycaster.currentLayerHit)
+	void OnLayerChanged (Layer newLayer) {
+        switch (newLayer)
         {
             case Layer.Enemy:
                 Cursor.SetCursor(attackCursor, cursorHotspot, CursorMode.Auto);
@@ -37,3 +37,4 @@ public class CursorAffordance : MonoBehaviour {
         }
     }       
 }
+//TODO consider de-registering OnLayerChanged on leaving all game scenes
