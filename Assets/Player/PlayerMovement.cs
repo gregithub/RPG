@@ -6,9 +6,12 @@ using UnityStandardAssets.Characters.ThirdPerson;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] float walkMoveStopRadius = 0.2f;
+    [SerializeField] float attackMoveStopRadius = 5f;
+
     ThirdPersonCharacter thirdPersonCHaracter;   // A reference to the ThirdPersonCharacter on the object
     CameraRaycaster cameraRaycaster;
-    Vector3 currentClickTarget;
+    Vector3 currentDestination;
+    Vector3 clickPoint;
 
     bool isInDirectMode = false;
 
@@ -16,7 +19,7 @@ public class PlayerMovement : MonoBehaviour
     {
         cameraRaycaster = Camera.main.GetComponent<CameraRaycaster>();
         thirdPersonCHaracter = GetComponent<ThirdPersonCharacter>();
-        currentClickTarget = transform.position;
+        currentDestination = transform.position;
     }
 
     // Fixed update is called in sync with physics
@@ -25,7 +28,7 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.G))    //TODO G dor gamepad. allow player to map later
         {
             isInDirectMode = !isInDirectMode; //toggle mode
-            currentClickTarget = transform.position;
+            currentDestination = transform.position;
         }
         if (isInDirectMode)
         {
@@ -52,21 +55,27 @@ public class PlayerMovement : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
+            clickPoint = cameraRaycaster.hit.point;
             switch (cameraRaycaster.currentLayerHit)
             {
                 case Layer.Walkable:
-                    currentClickTarget = cameraRaycaster.hit.point;
+                    currentDestination = ShortDestination(clickPoint,walkMoveStopRadius);
                     break;
 
                 case Layer.Enemy:
-                    print("Not moving to enemy");
+                    currentDestination = ShortDestination(clickPoint, attackMoveStopRadius);
                     break;
                 default:
                     print("unexpected layer found");
                     return;
             }
         }
-        var playerToClickPoint = currentClickTarget - transform.position;
+        WalkToDestrination();
+    }
+
+    private void WalkToDestrination()
+    {
+        var playerToClickPoint = currentDestination - transform.position;
         if (playerToClickPoint.magnitude >= walkMoveStopRadius)
         {
             thirdPersonCHaracter.Move(playerToClickPoint, false, false);
@@ -75,6 +84,22 @@ public class PlayerMovement : MonoBehaviour
         {
             thirdPersonCHaracter.Move(Vector3.zero, false, false);
         }
+    }
+
+    Vector3 ShortDestination(Vector3 destrination, float shortening) {
+        Vector3 reductionVector = (destrination - transform.position).normalized * shortening;
+        return destrination - reductionVector;
+    }
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.black;
+        Gizmos.DrawLine(transform.position, currentDestination);
+        Gizmos.DrawSphere(currentDestination, 0.1f);
+        Gizmos.DrawSphere(clickPoint, 0.2f);
+
+        //Draw atatck sphere
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackMoveStopRadius);
     }
 }
 
